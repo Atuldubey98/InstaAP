@@ -15,7 +15,7 @@ class _ChatScreenState extends State<ChatScreen> {
   SocketItem _socketItem = new SocketItem();
   @override
   void initState() {
-    _socketItem.connectSocketIO();
+    _socketItem.subscribetomessge();
     super.initState();
   }
 
@@ -48,7 +48,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      _socketItem.sendmessageItem(_messageController.text);
+                    },
                     child: Container(
                         height: 40,
                         alignment: Alignment.center,

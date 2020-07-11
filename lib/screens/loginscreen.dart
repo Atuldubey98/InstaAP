@@ -26,8 +26,9 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
       }
       if (value == "notconnected") {
         print(value);
-        showDialog(
-            context: context, builder: (context) => showDialogITEM(value));
+        return showDialog(
+            context: context,
+            builder: (context) => showDialogITEM(value, context));
       }
 
       return value;
@@ -54,7 +55,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
       } else {
         showDialog(
           context: context,
-          builder: (context) => showDialogITEM("Wrong Credentials"),
+          builder: (context) => showDialogITEM("Wrong Credentials", context),
         );
         print("Wrong Credentials");
       }
