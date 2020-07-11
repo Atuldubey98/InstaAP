@@ -27,9 +27,7 @@ class _ChatFriendsListState extends State<ChatFriendsList> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (conetext) => ChatScreen(
-            friend,
-          ),
+          builder: (conetext) => ChatScreen(friend, chatid),
         ),
       );
     });

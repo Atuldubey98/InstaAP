@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:instaAP/utility/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthenticateME {
+  SocketIO socketIO;
   Future<String> checkServerConnection() async {
     final response = await http.get(Utils.url);
     if (response.statusCode > 200) {
@@ -33,5 +36,10 @@ class AuthenticateME {
         headers: Utils.map);
     final jsonData = response.body;
     print(jsonData);
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
   }
 }

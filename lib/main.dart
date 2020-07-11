@@ -15,26 +15,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool isAuthenticated = false;
-  @override
-  void initState() {
-    checkStatus();
-    super.initState();
-  }
-
-  checkStatus() async {
+  Future checkStatus() async {
     final prefs = await SharedPreferences.getInstance();
     print(prefs.getBool("auth"));
 
     if (prefs.getBool("auth") == null ||
         prefs.getBool("auth") == false ||
         prefs.getString("user") == null) {
-      isAuthenticated = true;
+      return false;
     } else {
-      isAuthenticated = false;
       Useritemdata.username = prefs.getString("user");
       Useritemdata.isauth = prefs.getBool("auth");
       print(Useritemdata.username);
+      return true;
     }
   }
 
@@ -59,7 +52,17 @@ class _MyAppState extends State<MyApp> {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: isAuthenticated == false ? ChatRooms() : AuthenticateScreen(),
+      home: FutureBuilder(
+        builder: (context, datasnap) {
+          if (datasnap.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (datasnap.data == true) {
+            return ChatRooms();
+          }
+          return AuthenticateScreen();
+        },
+        future: checkStatus(),
+      ),
     );
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:instaAP/dataprovider/authenticateME.dart';
 
 import 'package:instaAP/screens/friendsItem.dart';
-import 'package:instaAP/widgets/simplewidgets.dart';
+import 'package:instaAP/screens/loginscreen.dart';
 
 class ChatRooms extends StatefulWidget {
   @override
@@ -9,6 +10,7 @@ class ChatRooms extends StatefulWidget {
 }
 
 class _ChatRoomsState extends State<ChatRooms> {
+  AuthenticateME _authenticateME = new AuthenticateME();
   @override
   void initState() {
     super.initState();
@@ -17,7 +19,23 @@ class _ChatRoomsState extends State<ChatRooms> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar("Your Chat Rooms"),
+      appBar: AppBar(
+        title: Text('Your Chat Rooms'),
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.all_out),
+              onPressed: () {
+                _authenticateME.logout().then((_) {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AuthenticateScreen(),
+                      ),
+                      (route) => false);
+                });
+              })
+        ],
+      ),
       body: Container(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

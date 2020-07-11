@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_socket_io/flutter_socket_io.dart';
+
 import 'package:instaAP/dataprovider/authenticateME.dart';
 import 'package:instaAP/screens/loginscreen.dart';
 import 'package:instaAP/widgets/simplewidgets.dart';
-
-import '../utility/utils.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -23,25 +21,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: buildAppBar("Login Screen"),
       body: Container(
+        color: Color.fromRGBO(100, 185, 147, 1),
         padding: EdgeInsets.all(20),
         child: Form(
           key: formkey,
           child: Column(
             children: <Widget>[
               TextFormField(
+                decoration: simpleInputDecoration(),
                 controller: usernameController,
               ),
               SizedBox(
                 height: 10,
               ),
               TextFormField(
+                decoration: simpleInputDecoration(),
                 validator: (value) {
                   return value.length > 6
                       ? null
@@ -80,7 +79,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   );
                 },
                 child: Container(
-                  child: Text("Have An Account Register"),
+                  child: Text(
+                    "Have An Account Register",
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
                 ),
               )
             ],

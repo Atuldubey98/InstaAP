@@ -16,7 +16,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
   AuthenticateME _authenticateME = new AuthenticateME();
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passController = new TextEditingController();
-
+  bool _isLoading = false;
   @override
   void initState() {
     _authenticateME.checkServerConnection().then((value) {
@@ -39,6 +39,9 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
 
   logintoServer(String username, String password) {
     _authenticateME.loginME(username, password).then((value) async {
+      setState(() {
+        _isLoading = true;
+      });
       final prefs = await SharedPreferences.getInstance();
       if (value == true) {
         Useritemdata.isauth = value;
@@ -51,7 +54,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
           MaterialPageRoute(
             builder: (context) => ChatRooms(),
           ),
-        );
+        ).then((_) => {_isLoading = false});
       } else {
         showDialog(
           context: context,
@@ -59,6 +62,10 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
         );
         print("Wrong Credentials");
       }
+    }).then((_) {
+      setState(() {
+        _isLoading = false;
+      });
     });
   }
 
@@ -67,6 +74,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
     return Scaffold(
       appBar: buildAppBar("Login Screen"),
       body: Container(
+        color: Color.fromRGBO(100, 185, 147, 1),
         padding: EdgeInsets.all(20),
         child: Form(
           key: formkey,
@@ -74,6 +82,17 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
             children: <Widget>[
               TextFormField(
                 controller: usernameController,
+                style: TextStyle(fontSize: 20, color: Colors.white),
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.all(8),
+                  hintText: "Enter username",
+                  hintStyle: TextStyle(fontSize: 20),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(20),
+                    ),
+                  ),
+                ),
               ),
               SizedBox(
                 height: 10,
@@ -85,6 +104,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
                       : "Please Provide passowrd greater than 6 character";
                 },
                 controller: passController,
+                decoration: simpleInputDecoration(),
               ),
               SizedBox(
                 height: 20,
@@ -101,10 +121,14 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
                     color: Colors.blue,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    'Login',
-                    style: TextStyle(fontSize: 25),
-                  ),
+                  child: _isLoading
+                      ? CircularProgressIndicator(
+                          backgroundColor: Colors.white,
+                        )
+                      : Text(
+                          'Login',
+                          style: TextStyle(fontSize: 25),
+                        ),
                 ),
               ),
               SizedBox(
@@ -120,8 +144,18 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
                   );
                 },
                 child: Container(
-                  child: Text("Register Now"),
-                ),
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Dont have an Account ",
+                            style: TextStyle(
+                              fontSize: 15,
+                            ),
+                            children: [
+                      TextSpan(
+                          text: "Register Now!",
+                          style: TextStyle(
+                              fontSize: 20, fontStyle: FontStyle.italic)),
+                    ]))),
               )
             ],
           ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:instaAP/models/userData.dart';
 import 'package:instaAP/utility/utils.dart';
 
 class UserListProvider {
@@ -10,7 +11,9 @@ class UserListProvider {
     final jsonData = json.decode(response.body);
     print(jsonData);
     jsonData["data"].forEach((element) {
-      _users.add(element['user']);
+      if (element['user'] != Useritemdata.username) {
+        _users.add(element['user']);
+      }
     });
     print(_users);
     return _users;
