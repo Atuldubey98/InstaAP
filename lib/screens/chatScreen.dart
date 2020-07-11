@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:instaAP/dataprovider/socketcodepro.dart';
 
 import 'package:instaAP/widgets/simplewidgets.dart';
+
+import '../utility/utils.dart';
 
 class ChatScreen extends StatefulWidget {
   final String friend;
@@ -13,14 +18,23 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController _messageController = new TextEditingController();
   SocketItem _socketItem = new SocketItem();
+  SocketIO socketIO;
+
   @override
   void initState() {
-    _socketItem.subscribetomessge();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    this.socketIO = Utils.getSocketIO((data) {
+      debugPrint(data.toString());
+    });
+    socketIO.subscribe("receiveMessage", (data) {
+        print(data);
+    });
+
     return Scaffold(
       appBar: buildAppBar(widget.friend),
       body: Stack(
@@ -49,7 +63,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      _socketItem.sendmessageItem(_messageController.text);
+                      this.socketIO.sendMessage("getMessage", jsonEncode({
+                        'message':_messageController.text
+                      }));
+                      _messageController.clear();
                     },
                     child: Container(
                         height: 40,

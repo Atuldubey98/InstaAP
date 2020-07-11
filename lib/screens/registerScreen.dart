@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:instaAP/dataprovider/authenticateME.dart';
 import 'package:instaAP/screens/loginscreen.dart';
 import 'package:instaAP/widgets/simplewidgets.dart';
+
+import '../utility/utils.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -13,14 +16,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   AuthenticateME _authenticateME = new AuthenticateME();
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passController = new TextEditingController();
+
   registerMySelf() {
     if (formkey.currentState.validate()) {
       _authenticateME.registerME(usernameController.text, passController.text);
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: buildAppBar("Login Screen"),
       body: Container(

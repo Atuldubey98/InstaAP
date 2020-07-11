@@ -29,9 +29,9 @@ class _MyAppState extends State<MyApp> {
     if (prefs.getBool("auth") == null ||
         prefs.getBool("auth") == false ||
         prefs.getString("user") == null) {
-      isAuthenticated = false;
-    } else {
       isAuthenticated = true;
+    } else {
+      isAuthenticated = false;
       Useritemdata.username = prefs.getString("user");
       Useritemdata.isauth = prefs.getBool("auth");
       print(Useritemdata.username);
