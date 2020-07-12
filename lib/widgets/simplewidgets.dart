@@ -6,13 +6,16 @@ AppBar buildAppBar(String heading) {
       heading,
       style: simpletextStyle(),
     ),
-    backgroundColor: Color.fromRGBO(85, 88, 107, 1),
+    backgroundColor: Color.fromRGBO(41, 128, 185, 1),
   );
 }
 
 AlertDialog showDialogITEM(String item, BuildContext context) {
   return AlertDialog(
+    contentPadding: EdgeInsets.all(8),
+    title: Text("Alert !"),
     content: Text(item),
+    elevation: 10,
     actions: <Widget>[
       RaisedButton(
         onPressed: () {

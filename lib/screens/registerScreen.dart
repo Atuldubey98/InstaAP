@@ -17,16 +17,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   registerMySelf() {
     if (formkey.currentState.validate()) {
-      _authenticateME.registerME(usernameController.text, passController.text);
+      _authenticateME
+          .registerME(usernameController.text, passController.text)
+          .then((value) {
+        if (value == "OK") {
+          showDialog(
+              context: context,
+              builder: (context) =>
+                  showDialogITEM("User Created Login to continue", context));
+        } else {
+          showDialog(
+              context: context,
+              builder: (context) =>
+                  showDialogITEM("Something is Wrong Try Again", context));
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar("Login Screen"),
+      appBar: buildAppBar("Register Screen"),
       body: Container(
-        color: Color.fromRGBO(100, 185, 147, 1),
         padding: EdgeInsets.all(20),
         child: Form(
           key: formkey,
@@ -65,7 +78,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: Text(
                     'Register',
-                    style: TextStyle(fontSize: 25),
+                    style: TextStyle(fontSize: 25, color: Colors.black),
                   ),
                 ),
               ),
@@ -81,7 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Container(
                   child: Text(
                     "Have An Account Register",
-                    style: TextStyle(fontSize: 20, color: Colors.white),
+                    style: TextStyle(fontSize: 20, color: Colors.black),
                   ),
                 ),
               )

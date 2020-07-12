@@ -74,7 +74,6 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
     return Scaffold(
       appBar: buildAppBar("Login Screen"),
       body: Container(
-        color: Color.fromRGBO(100, 185, 147, 1),
         padding: EdgeInsets.all(20),
         child: Form(
           key: formkey,
@@ -82,7 +81,9 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
             children: <Widget>[
               TextFormField(
                 controller: usernameController,
-                style: TextStyle(fontSize: 20, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 20,
+                ),
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.all(8),
                   hintText: "Enter username",
@@ -147,14 +148,14 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
                     child: RichText(
                         text: TextSpan(
                             text: "Dont have an Account ",
-                            style: TextStyle(
-                              fontSize: 15,
-                            ),
+                            style: TextStyle(fontSize: 15, color: Colors.black),
                             children: [
                       TextSpan(
                           text: "Register Now!",
                           style: TextStyle(
-                              fontSize: 20, fontStyle: FontStyle.italic)),
+                              color: Colors.black,
+                              fontSize: 20,
+                              fontStyle: FontStyle.italic)),
                     ]))),
               )
             ],

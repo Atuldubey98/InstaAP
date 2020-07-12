@@ -19,6 +19,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  ScrollController _scrollController;
   TextEditingController _messageController = new TextEditingController();
   Stream _stream;
   final StreamController _streamController = new StreamController();
@@ -40,8 +41,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
+    _scrollController = ScrollController();
     _stream = _streamController.stream;
     getChatlist(widget.chatid);
+
     super.initState();
   }
 
@@ -99,13 +102,14 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
-                  color: Color.fromRGBO(42, 122, 247, 1),
+                  color: Color.fromRGBO(41, 128, 185, 1),
                   borderRadius:
                       BorderRadius.vertical(top: Radius.circular(30))),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
+                      style: TextStyle(color: Colors.white),
                       controller: _messageController,
                       decoration: InputDecoration(
                           hintText: "Message....",
@@ -127,6 +131,10 @@ class _ChatScreenState extends State<ChatScreen> {
                             "sentby": Useritemdata.username
                           }));
                       _messageController.clear();
+                      _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: Duration(milliseconds: 600),
+                          curve: Curves.ease);
                     },
                     child: Container(
                         height: 40,
@@ -174,7 +182,7 @@ class MessageList extends StatelessWidget {
                       topRight: Radius.circular(23),
                       bottomRight: Radius.circular(23)),
               color: isSentByMe
-                  ? Color.fromRGBO(73, 104, 112, 1)
+                  ? Color.fromRGBO(41, 128, 185, 1)
                   : Color.fromRGBO(84, 196, 227, 1)),
           child: Text(
             message,

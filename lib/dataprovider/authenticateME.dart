@@ -28,14 +28,20 @@ class AuthenticateME {
     return jsonData['status'] == "ok" ? true : false;
   }
 
-  Future<void> registerME(String username, String password) async {
+  Future<String> registerME(String username, String password) async {
     final response = await http.post(Utils.url + Utils.register,
         body: json.encode(
           {"user": username, "password": password},
         ),
         headers: Utils.map);
-    final jsonData = response.body;
+    final jsonData = json.decode(response.body);
+
     print(jsonData);
+    if (jsonData['status'] == "notok") {
+      return "notok";
+    }
+
+    return "OK";
   }
 
   Future<void> logout() async {

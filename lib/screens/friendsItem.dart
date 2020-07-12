@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:instaAP/chatprovider/createchat.dart';
 
 import 'package:instaAP/dataprovider/userlistprovider.dart';
-import 'package:instaAP/models/userData.dart';
-import 'package:instaAP/screens/chatScreen.dart';
+
 import 'package:instaAP/widgets/simplewidgets.dart';
 
 class ChatFriendsList extends StatefulWidget {
@@ -19,27 +18,8 @@ class _ChatFriendsListState extends State<ChatFriendsList> {
   CreateChat _createChat = new CreateChat();
 
   UserListProvider _userListProvider = new UserListProvider();
-  String chatid;
-  createItem(String friend) {
-    chatid = getChatRooms(Useritemdata.username, friend);
-    print(chatid);
-    _createChat.createChatID(chatid).then((_) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (conetext) => ChatScreen(friend, chatid),
-        ),
-      );
-    });
-  }
 
-  getChatRooms(String a, String b) {
-    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
-      return "$b\_$a";
-    } else {
-      return "$a\_$b";
-    }
-  }
+  String chatid;
 
   @override
   void initState() {
@@ -65,7 +45,7 @@ class _ChatFriendsListState extends State<ChatFriendsList> {
               itemBuilder: (context, index) {
                 return ListTile(
                   onTap: () {
-                    createItem(snapshot.data[index]);
+                    _createChat.createItem(snapshot.data[index], context);
                   },
                   title: Text(snapshot.data[index]),
                 );

@@ -9,6 +9,7 @@ class Utils {
   static String chatiditem = "/createchatID";
   static Map<String, String> map = {"Content-type": "application/json"};
   static String chatlistitem = "/getchatlist/";
+  static String clients = "/clients";
 
   static SocketIO getSocketIO(Function socketStatus) {
     SocketIO socketIO = SocketIOManager()
