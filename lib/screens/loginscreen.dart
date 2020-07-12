@@ -73,92 +73,99 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar("Login Screen"),
-      body: Container(
-        padding: EdgeInsets.all(20),
-        child: Form(
-          key: formkey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                controller: usernameController,
-                style: TextStyle(
-                  fontSize: 20,
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Form(
+            key: formkey,
+            child: Column(
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset("assets/images/images.png"),
                 ),
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(8),
-                  hintText: "Enter username",
-                  hintStyle: TextStyle(fontSize: 20),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(20),
+                TextFormField(
+                  controller: usernameController,
+                  style: TextStyle(
+                    fontSize: 20,
+                  ),
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.all(8),
+                    hintText: "Enter username",
+                    hintStyle: TextStyle(fontSize: 20),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(20),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              TextFormField(
-                validator: (value) {
-                  return value.length > 6
-                      ? null
-                      : "Please Provide passowrd greater than 6 character";
-                },
-                controller: passController,
-                decoration: simpleInputDecoration(),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              GestureDetector(
-                onTap: () {
-                  logintoServer(usernameController.text, passController.text);
-                },
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  alignment: Alignment.center,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: _isLoading
-                      ? CircularProgressIndicator(
-                          backgroundColor: Colors.white,
-                        )
-                      : Text(
-                          'Login',
-                          style: TextStyle(fontSize: 25),
-                        ),
+                SizedBox(
+                  height: 10,
                 ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RegisterScreen(),
+                TextFormField(
+                  validator: (value) {
+                    return value.length > 6
+                        ? null
+                        : "Please Provide passowrd greater than 6 character";
+                  },
+                  controller: passController,
+                  decoration: simpleInputDecoration(),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    logintoServer(usernameController.text, passController.text);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    alignment: Alignment.center,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                  );
-                },
-                child: Container(
-                    child: RichText(
-                        text: TextSpan(
-                            text: "Dont have an Account ",
-                            style: TextStyle(fontSize: 15, color: Colors.black),
-                            children: [
-                      TextSpan(
-                          text: "Register Now!",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                              fontStyle: FontStyle.italic)),
-                    ]))),
-              )
-            ],
+                    child: _isLoading
+                        ? CircularProgressIndicator(
+                            backgroundColor: Colors.white,
+                          )
+                        : Text(
+                            'Login',
+                            style: TextStyle(fontSize: 25),
+                          ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RegisterScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                      child: RichText(
+                          text: TextSpan(
+                              text: "Dont have an Account ",
+                              style:
+                                  TextStyle(fontSize: 15, color: Colors.black),
+                              children: [
+                        TextSpan(
+                            text: "Register Now!",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontStyle: FontStyle.italic)),
+                      ]))),
+                )
+              ],
+            ),
           ),
         ),
       ),

@@ -57,8 +57,18 @@ class _MyAppState extends State<MyApp> {
         builder: (context, datasnap) {
           if (datasnap.connectionState == ConnectionState.waiting) {
             return Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
+              body: Container(
+                child: Column(
+                  children: <Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(name),
+                    ),
+                    Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+                ),
               ),
             );
           } else if (datasnap.data == true) {
