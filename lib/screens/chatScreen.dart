@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:instaAP/models/messageitem.dart';
@@ -30,7 +30,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     _scrollController = ScrollController();
-
+    getChatbychatid();
     _stream = _streamController.stream;
 
     super.initState();
@@ -43,6 +43,25 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  Future getChatbychatid() async {
+    final response =
+        await http.get(Utils.url + Utils.chatlistitem + widget.chatid);
+    final jsonData = json.decode(response.body);
+    print(jsonData);
+    jsonData['data']['message'].forEach((element) {
+      final _message =
+          Message(message: element['mess'], sentBy: element['sentby']);
+      _list.add(_message);
+    });
+    Future.delayed(Duration(
+      milliseconds: 500,
+    )).then((value) {
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+          curve: Curves.easeIn, duration: Duration(milliseconds: 100));
+    });
+    _streamController.add(_list);
+  }
+
   @override
   Widget build(BuildContext context) {
     this.socketIO = Utils.getSocketIO((data) {
@@ -52,10 +71,13 @@ class _ChatScreenState extends State<ChatScreen> {
       print(socketIO.getId());
       final Message _message = Message(
           message: json.decode(data)['message'],
-          sentBy: json.decode(data)['sentbyme']);
+          sentBy: json.decode(data)['sentby']);
       _list.add(_message);
-      Future.delayed(Duration(milliseconds: 500,)).then((value) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,curve: Curves.easeIn, duration: Duration(milliseconds: 100));
+      Future.delayed(Duration(
+        milliseconds: 500,
+      )).then((value) {
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+            curve: Curves.easeIn, duration: Duration(milliseconds: 100));
       });
       print(json.decode(data)['message']);
       _streamController.add(_list);
@@ -74,7 +96,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       print(dataSnap.data[index].sentBy);
                       return MessageList(
                         message: dataSnap.data[index].message,
-                        isSentByMe: dataSnap.data[index].sentBy,
+                        isSentByMe: dataSnap.data[index].sentBy ==
+                            Useritemdata.username,
                       );
                     },
                     itemCount: _list.length,

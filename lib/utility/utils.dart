@@ -2,7 +2,7 @@ import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:flutter_socket_io/socket_io_manager.dart';
 
 class Utils {
-  static String url = "http://192.168.43.104:5000";
+  static String url = "http://192.168.0.100:5000";
   static String login = "/login";
   static String register = "/register";
   static String userlist = "/userlist";
@@ -18,5 +18,4 @@ class Utils {
     socketIO.connect();
     return socketIO;
   }
-
 }

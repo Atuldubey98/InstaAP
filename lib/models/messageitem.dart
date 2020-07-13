@@ -1,5 +1,5 @@
 class Message {
   String message;
-  bool sentBy;
+  String sentBy;
   Message({this.message, this.sentBy});
 }
