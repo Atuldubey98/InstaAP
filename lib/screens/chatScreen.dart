@@ -54,6 +54,9 @@ class _ChatScreenState extends State<ChatScreen> {
           message: json.decode(data)['message'],
           sentBy: json.decode(data)['sentbyme']);
       _list.add(_message);
+      Future.delayed(Duration(milliseconds: 500,)).then((value) {
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,curve: Curves.easeIn, duration: Duration(milliseconds: 100));
+      });
       print(json.decode(data)['message']);
       _streamController.add(_list);
     });

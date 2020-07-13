@@ -19,9 +19,7 @@ class _MyAppState extends State<MyApp> {
     final prefs = await SharedPreferences.getInstance();
     print(prefs.getBool("auth"));
 
-    if (prefs.getBool("auth") == null ||
-        prefs.getBool("auth") == false ||
-        prefs.getString("user") == null) {
+    if (prefs.getBool("auth") == null || prefs.getBool("auth") == false || prefs.getString("user") == null) {
       return false;
     } else {
       Useritemdata.username = prefs.getString("user");
