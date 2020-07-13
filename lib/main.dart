@@ -62,7 +62,7 @@ class _MyAppState extends State<MyApp> {
                   children: <Widget>[
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(name),
+                      child: Image.asset("assets/images/images.png"),
                     ),
                     Center(
                       child: CircularProgressIndicator(),

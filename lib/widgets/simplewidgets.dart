@@ -34,7 +34,7 @@ TextStyle simpletextStyle() {
 InputDecoration simpleInputDecoration() {
   return InputDecoration(
     contentPadding: EdgeInsets.all(8),
-    hintText: "Enter username",
+    hintText: "Enter Password",
     hintStyle: TextStyle(fontSize: 20),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.all(

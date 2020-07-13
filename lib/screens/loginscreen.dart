@@ -16,7 +16,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
   AuthenticateME _authenticateME = new AuthenticateME();
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passController = new TextEditingController();
-  bool _isLoading = false;
+  bool isLoading = false;
   @override
   void initState() {
     _authenticateME.checkServerConnection().then((value) {
@@ -39,9 +39,6 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
 
   logintoServer(String username, String password) {
     _authenticateME.loginME(username, password).then((value) async {
-      setState(() {
-        _isLoading = true;
-      });
       final prefs = await SharedPreferences.getInstance();
       if (value == true) {
         Useritemdata.isauth = value;
@@ -54,7 +51,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
           MaterialPageRoute(
             builder: (context) => ChatRooms(),
           ),
-        ).then((_) => {_isLoading = false});
+        );
       } else {
         showDialog(
           context: context,
@@ -62,11 +59,14 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
         );
         print("Wrong Credentials");
       }
-    }).then((_) {
-      setState(() {
-        _isLoading = false;
-      });
     });
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passController.dispose();
+    super.dispose();
   }
 
   @override
@@ -91,6 +91,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
                   ),
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.all(8),
+                    border: InputBorder.none,
                     hintText: "Enter username",
                     hintStyle: TextStyle(fontSize: 20),
                     enabledBorder: OutlineInputBorder(
@@ -127,14 +128,10 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: _isLoading
-                        ? CircularProgressIndicator(
-                            backgroundColor: Colors.white,
-                          )
-                        : Text(
-                            'Login',
-                            style: TextStyle(fontSize: 25),
-                          ),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(fontSize: 25),
+                    ),
                   ),
                 ),
                 SizedBox(

@@ -10,8 +10,10 @@ import 'package:instaAP/models/userData.dart';
 import 'package:instaAP/screens/friendsItem.dart';
 import 'package:instaAP/screens/loginscreen.dart';
 import 'package:instaAP/utility/utils.dart';
+import 'package:instaAP/widgets/simplewidgets.dart';
 
 class ChatRooms extends StatefulWidget {
+  ChatRooms();
   @override
   _ChatRoomsState createState() => _ChatRoomsState();
 }
@@ -71,7 +73,7 @@ class _ChatRoomsState extends State<ChatRooms> {
         ],
       ),
       body: Container(
-        child: StreamBuilder(
+        child: StreamBuilder<List<String>>(
             stream: getChatlist,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
@@ -92,8 +94,10 @@ class _ChatRoomsState extends State<ChatRooms> {
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
-                  child: CircularProgressIndicator(),
-                );
+                    child: Text(
+                  "Loading....",
+                  style: simpletextStyle(),
+                ));
               }
               return Center(
                 child: Text("No Chat"),

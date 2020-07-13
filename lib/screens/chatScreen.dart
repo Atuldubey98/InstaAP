@@ -20,6 +20,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   ScrollController _scrollController;
+
   TextEditingController _messageController = new TextEditingController();
   Stream _stream;
   final StreamController _streamController = new StreamController();
@@ -43,6 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     _scrollController = ScrollController();
     _stream = _streamController.stream;
+
     getChatlist(widget.chatid);
 
     super.initState();
@@ -52,6 +54,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     socketIO.unSubscribesAll();
     _messageController.dispose();
+    _streamController.close();
     super.dispose();
   }
 
@@ -74,6 +77,8 @@ class _ChatScreenState extends State<ChatScreen> {
             builder: (context, dataSnap) {
               if (dataSnap.hasData) {
                 return ListView.builder(
+                  shrinkWrap: true,
+                  controller: _scrollController,
                   itemBuilder: (context, index) {
                     print(dataSnap.data[index].sentBy);
                     return MessageList(
@@ -100,11 +105,11 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             alignment: Alignment.bottomCenter,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 3),
               decoration: BoxDecoration(
                   color: Color.fromRGBO(41, 128, 185, 1),
                   borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(30))),
+                      BorderRadius.vertical(top: Radius.circular(20))),
               child: Row(
                 children: [
                   Expanded(
