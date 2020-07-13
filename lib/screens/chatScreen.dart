@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:instaAP/models/messageitem.dart';
@@ -26,35 +26,20 @@ class _ChatScreenState extends State<ChatScreen> {
   final StreamController _streamController = new StreamController();
   SocketIO socketIO;
   List<Message> _list = List<Message>();
-  Future getChatlist(String chatidentity) async {
-    final response =
-        await http.get(Utils.url + Utils.chatlistitem + chatidentity);
-    final jsonData = json.decode(response.body);
-    print(jsonData);
-    jsonData['data']['message'].forEach((element) {
-      final Message _message = new Message(
-          message: element['mess'],
-          sentBy: element['sentby'] == Useritemdata.username);
-      _list.add(_message);
-      _streamController.add(_list);
-    });
-  }
 
   @override
   void initState() {
     _scrollController = ScrollController();
-    _stream = _streamController.stream;
 
-    getChatlist(widget.chatid);
+    _stream = _streamController.stream;
 
     super.initState();
   }
 
   @override
   void dispose() {
-    socketIO.unSubscribesAll();
     _messageController.dispose();
-    _streamController.close();
+
     super.dispose();
   }
 
@@ -64,42 +49,47 @@ class _ChatScreenState extends State<ChatScreen> {
       debugPrint(data.toString());
     });
     socketIO.subscribe("${widget.chatid}", (data) {
+      print(socketIO.getId());
       final Message _message = Message(
           message: json.decode(data)['message'],
           sentBy: json.decode(data)['sentbyme']);
       _list.add(_message);
+      print(json.decode(data)['message']);
       _streamController.add(_list);
     });
     Widget chatMessageList() {
-      return Container(
-        padding: EdgeInsets.only(left: 8, right: 8),
-        child: StreamBuilder(
-            builder: (context, dataSnap) {
-              if (dataSnap.hasData) {
-                return ListView.builder(
-                  shrinkWrap: true,
-                  controller: _scrollController,
-                  itemBuilder: (context, index) {
-                    print(dataSnap.data[index].sentBy);
-                    return MessageList(
-                      message: dataSnap.data[index].message,
-                      isSentByMe: dataSnap.data[index].sentBy,
-                    );
-                  },
-                  itemCount: _list.length,
+      return Flexible(
+        child: Container(
+          padding: EdgeInsets.only(left: 8, right: 8),
+          child: StreamBuilder(
+              builder: (context, dataSnap) {
+                if (dataSnap.hasData) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    itemBuilder: (context, index) {
+                      print(dataSnap.data[index].sentBy);
+                      return MessageList(
+                        message: dataSnap.data[index].message,
+                        isSentByMe: dataSnap.data[index].sentBy,
+                      );
+                    },
+                    itemCount: _list.length,
+                  );
+                }
+                return Center(
+                  child: Text("This message is end to end encrypted"),
                 );
-              }
-              return Center(
-                child: Text("This message is end to end encrypted"),
-              );
-            },
-            stream: _stream),
+              },
+              stream: _stream),
+        ),
       );
     }
 
     return Scaffold(
       appBar: buildAppBar(widget.friend),
-      body: Stack(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           chatMessageList(),
           Container(
@@ -136,10 +126,6 @@ class _ChatScreenState extends State<ChatScreen> {
                             "sentby": Useritemdata.username
                           }));
                       _messageController.clear();
-                      _scrollController.animateTo(
-                          _scrollController.position.maxScrollExtent,
-                          duration: Duration(milliseconds: 600),
-                          curve: Curves.ease);
                     },
                     child: Container(
                         height: 40,
