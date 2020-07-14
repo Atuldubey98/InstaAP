@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 AppBar buildAppBar(String heading) {
   return AppBar(
+    elevation: 0,
     title: Text(
       heading,
       style: simpletextStyle(),

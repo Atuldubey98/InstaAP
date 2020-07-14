@@ -81,7 +81,7 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
             child: Column(
               children: <Widget>[
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(60),
                   child: Image.asset("assets/images/images.png"),
                 ),
                 TextFormField(

@@ -12,7 +12,8 @@ import 'package:instaAP/screens/loginscreen.dart';
 import 'package:instaAP/utility/utils.dart';
 
 class ChatRooms extends StatefulWidget {
-  ChatRooms();
+  final Function addtoList;
+  ChatRooms({this.addtoList});
   @override
   _ChatRoomsState createState() => _ChatRoomsState();
 }
@@ -25,7 +26,7 @@ class _ChatRoomsState extends State<ChatRooms> {
   Future getChat() async {
     final response = await http.get(Utils.url + Utils.clients);
     final jsondata = json.decode(response.body);
-    print(jsondata);
+
     jsondata['data'].forEach((element) {
       if (element['chatid'].contains(Useritemdata.username + "_")) {
         final item =
@@ -48,13 +49,16 @@ class _ChatRoomsState extends State<ChatRooms> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         backgroundColor: Color.fromRGBO(41, 128, 185, 1),
         title: Text(
-          'Your Chat Rooms',
+          'Your Friends',
           style: TextStyle(color: Colors.white),
         ),
         actions: <Widget>[
           IconButton(
+              tooltip: "Log Out",
               icon: Icon(
                 Icons.all_out,
                 color: Colors.white,
@@ -83,8 +87,14 @@ class _ChatRoomsState extends State<ChatRooms> {
                         onTap: () {
                           _createChat.createItem(snapshot.data[index], context);
                         },
-                        leading: CircleAvatar(),
-                        title: Text(snapshot.data[index]),
+                        leading: CircleAvatar(
+                          backgroundImage:
+                              ExactAssetImage("assets/images/images.png"),
+                        ),
+                        title: Text(
+                          snapshot.data[index],
+                          style: TextStyle(fontSize: 20),
+                        ),
                       ),
                     );
                   },

@@ -6,8 +6,6 @@ import 'package:flutter_socket_io/flutter_socket_io.dart';
 import 'package:instaAP/models/messageitem.dart';
 import 'package:instaAP/models/userData.dart';
 
-import 'package:instaAP/widgets/simplewidgets.dart';
-
 import '../utility/utils.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -22,6 +20,7 @@ class _ChatScreenState extends State<ChatScreen> {
   ScrollController _scrollController;
 
   TextEditingController _messageController = new TextEditingController();
+
   Stream _stream;
   final StreamController _streamController = new StreamController();
   SocketIO socketIO;
@@ -39,7 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
-
+    socketIO.unSubscribe("${widget.chatid}");
     super.dispose();
   }
 
@@ -47,7 +46,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final response =
         await http.get(Utils.url + Utils.chatlistitem + widget.chatid);
     final jsonData = json.decode(response.body);
-    print(jsonData);
+
     jsonData['data']['message'].forEach((element) {
       final _message =
           Message(message: element['mess'], sentBy: element['sentby']);
@@ -68,15 +67,20 @@ class _ChatScreenState extends State<ChatScreen> {
       debugPrint(data.toString());
     });
     socketIO.subscribe("${widget.chatid}", (data) {
-      print(socketIO.getId());
       final Message _message = Message(
           message: json.decode(data)['message'],
           sentBy: json.decode(data)['sentby']);
       _list.add(_message);
 
-      print(json.decode(data)['message']);
+      Future.delayed(Duration(
+        milliseconds: 500,
+      )).then((value) {
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+            curve: Curves.easeIn, duration: Duration(milliseconds: 100));
+      });
       _streamController.add(_list);
     });
+
     Widget chatMessageList() {
       return Flexible(
         child: Container(
@@ -88,7 +92,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     shrinkWrap: true,
                     controller: _scrollController,
                     itemBuilder: (context, index) {
-                      print(dataSnap.data[index].sentBy);
                       return MessageList(
                         message: dataSnap.data[index].message,
                         isSentByMe: dataSnap.data[index].sentBy ==
@@ -108,7 +111,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     return Scaffold(
-      appBar: buildAppBar(widget.friend),
+      appBar: AppBar(
+        title: Text(widget.friend),
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -151,7 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       )).then((value) {
                         _scrollController.animateTo(
                             _scrollController.position.maxScrollExtent,
-                            curve: Curves.easeIn,
+                            curve: Curves.bounceIn,
                             duration: Duration(milliseconds: 100));
                       });
                       _messageController.clear();
