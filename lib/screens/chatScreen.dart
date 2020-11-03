@@ -22,12 +22,30 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController _messageController = new TextEditingController();
 
   Stream _stream;
-  final StreamController _streamController = new StreamController();
-  SocketIO socketIO;
+  final StreamController _streamController = new StreamController.broadcast();
+
   List<Message> _list = List<Message>();
+
+  subscribetochatId() async {
+    utils.socketIO.subscribe("${widget.chatid}", (data) {
+      final Message _message = Message(
+          message: json.decode(data)['message'],
+          sentBy: json.decode(data)['sentby']);
+      _list.add(_message);
+
+      Future.delayed(Duration(
+        milliseconds: 500,
+      )).then((value) {
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+            curve: Curves.easeIn, duration: Duration(milliseconds: 100));
+      });
+      _streamController.add(_list);
+    });
+  }
 
   @override
   void initState() {
+    subscribetochatId();
     _scrollController = ScrollController();
     getChatbychatid();
     _stream = _streamController.stream;
@@ -38,7 +56,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
-    socketIO.unSubscribe("${widget.chatid}");
+    utils.socketIO.unSubscribe("${widget.chatid}");
+    _streamController.close();
     super.dispose();
   }
 
@@ -63,30 +82,24 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    this.socketIO = Utils.getSocketIO((data) {
-      debugPrint(data.toString());
-    });
-    socketIO.subscribe("${widget.chatid}", (data) {
-      final Message _message = Message(
-          message: json.decode(data)['message'],
-          sentBy: json.decode(data)['sentby']);
-      _list.add(_message);
-
-      Future.delayed(Duration(
-        milliseconds: 500,
-      )).then((value) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-            curve: Curves.easeIn, duration: Duration(milliseconds: 100));
-      });
-      _streamController.add(_list);
-    });
-
     Widget chatMessageList() {
       return Flexible(
         child: Container(
           padding: EdgeInsets.only(left: 8, right: 8),
           child: StreamBuilder(
               builder: (context, dataSnap) {
+                if (dataSnap.hasError) {
+                  return Center(
+                    child: Text("Server Down"),
+                  );
+                }
+                if (dataSnap.data == null) {
+                  return Center(
+                    child: Text(
+                      "This message is end to end encrypted",
+                    ),
+                  );
+                }
                 if (dataSnap.hasData) {
                   return ListView.builder(
                     shrinkWrap: true,
@@ -102,7 +115,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
                 return Center(
-                  child: Text("This message is end to end encrypted"),
+                  child: Text(
+                    "This message is end to end encrypted",
+                  ),
                 );
               },
               stream: _stream),
@@ -112,7 +127,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.friend),
+        elevation: 0,
+        title: Text(
+          widget.friend,
+        ),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,60 +144,82 @@ class _ChatScreenState extends State<ChatScreen> {
                   color: Color.fromRGBO(41, 128, 185, 1),
                   borderRadius:
                       BorderRadius.vertical(top: Radius.circular(20))),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      style: TextStyle(color: Colors.white),
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                          hintText: "Message....",
-                          hintStyle: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 20,
-                          ),
-                          border: InputBorder.none),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      this.socketIO.sendMessage(
-                          "getMessage",
-                          jsonEncode({
-                            'message': _messageController.text,
-                            "sentbyme": true,
-                            "chatid": widget.chatid,
-                            "sentby": Useritemdata.username
-                          }));
-                      Future.delayed(Duration(
-                        milliseconds: 500,
-                      )).then((value) {
-                        _scrollController.animateTo(
-                            _scrollController.position.maxScrollExtent,
-                            curve: Curves.bounceIn,
-                            duration: Duration(milliseconds: 100));
-                      });
-                      _messageController.clear();
-                    },
-                    child: Container(
-                        height: 40,
-                        alignment: Alignment.center,
-                        width: 40,
-                        decoration: BoxDecoration(
-                            color: Color.fromRGBO(5, 28, 64, 1),
-                            borderRadius: BorderRadius.circular(40)),
-                        padding: EdgeInsets.all(12),
-                        child: Icon(
-                          Icons.send,
-                          color: Colors.white,
-                        )),
-                  )
-                ],
-              ),
+              child: _MessageWidget(
+                  messageController: _messageController,
+                  socketIO: utils.socketIO,
+                  widget: widget,
+                  scrollController: _scrollController),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MessageWidget extends StatelessWidget {
+  const _MessageWidget({
+    Key key,
+    @required TextEditingController messageController,
+    @required this.socketIO,
+    @required this.widget,
+    @required ScrollController scrollController,
+  })  : _messageController = messageController,
+        _scrollController = scrollController,
+        super(key: key);
+
+  final TextEditingController _messageController;
+  final SocketIO socketIO;
+  final ChatScreen widget;
+  final ScrollController _scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            style: TextStyle(color: Colors.white, fontSize: 20),
+            controller: _messageController,
+            decoration: InputDecoration(
+                hintText: "Message....",
+                hintStyle: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 20,
+                ),
+                border: InputBorder.none),
+          ),
+        ),
+  
+        GestureDetector(
+          onTap: () {
+            if (utils.socketIO != null) {
+              utils.socketIO.sendMessage(
+                  "getMessage",
+                  jsonEncode({
+                    'message': _messageController.text,
+                    "sentbyme": true,
+                    "chatid": widget.chatid,
+                    "sentby": Useritemdata.username
+                  }));
+              Future.delayed(Duration(
+                milliseconds: 500,
+              )).then((value) {
+                _scrollController.animateTo(
+                    _scrollController.position.maxScrollExtent,
+                    curve: Curves.bounceIn,
+                    duration: Duration(milliseconds: 100));
+              });
+              _messageController.clear();
+            }
+          },
+          child: Icon(
+            Icons.send,
+            size: 30,
+            color: Colors.white,
+          ),
+        )
+      ],
     );
   }
 }
@@ -211,7 +251,7 @@ class MessageList extends StatelessWidget {
                   : Color.fromRGBO(84, 196, 227, 1)),
           child: Text(
             message,
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(fontSize: 18, color: Colors.white),
           )),
     );
   }

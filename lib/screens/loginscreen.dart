@@ -16,7 +16,8 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
   AuthenticateME _authenticateME = new AuthenticateME();
   TextEditingController usernameController = new TextEditingController();
   TextEditingController passController = new TextEditingController();
-  bool isLoading = false;
+  bool _isloading = false;
+
   @override
   void initState() {
     _authenticateME.checkServerConnection().then((value) {
@@ -40,13 +41,17 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
   logintoServer(String username, String password) {
     _authenticateME.loginME(username, password).then((value) async {
       final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _isloading = true;
+      });
       if (value == true) {
         Useritemdata.isauth = value;
         prefs.setString("user", username);
         prefs.setBool("auth", value);
         Useritemdata.username = username;
         print("User Logged in");
-        Navigator.pushReplacement(
+
+        await Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => ChatRooms(),
@@ -57,7 +62,10 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
           context: context,
           builder: (context) => showDialogITEM("Wrong Credentials", context),
         );
-        print("Wrong Credentials");
+
+        setState(() {
+          _isloading = false;
+        });
       }
     });
   }
@@ -73,96 +81,153 @@ class _AuthenticateScreenState extends State<AuthenticateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar("Login Screen"),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Form(
-            key: formkey,
-            child: Column(
-              children: <Widget>[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(60),
-                  child: Image.asset("assets/images/images.png"),
-                ),
-                TextFormField(
-                  controller: usernameController,
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.all(8),
-                    border: InputBorder.none,
-                    hintText: "Enter username",
-                    hintStyle: TextStyle(fontSize: 20),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20),
+      body: Container(
+        decoration: BoxDecoration(
+          color: Color.fromRGBO(41, 128, 185, 0.2),
+        ),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Form(
+              key: formkey,
+              child: Column(
+                children: [
+                  Column(
+                    children: <Widget>[
+                      Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(60)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(60),
+                          child: Image.asset("assets/images/images.png"),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  validator: (value) {
-                    return value.length > 6
-                        ? null
-                        : "Please Provide passowrd greater than 6 character";
-                  },
-                  controller: passController,
-                  decoration: simpleInputDecoration(),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    logintoServer(usernameController.text, passController.text);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(8),
-                    alignment: Alignment.center,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Login',
-                      style: TextStyle(fontSize: 25),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => RegisterScreen(),
+                      SizedBox(
+                        height: 20,
                       ),
-                    );
-                  },
-                  child: Container(
-                      child: RichText(
-                          text: TextSpan(
-                              text: "Dont have an Account ",
-                              style:
-                                  TextStyle(fontSize: 15, color: Colors.black),
-                              children: [
-                        TextSpan(
-                            text: "Register Now!",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontStyle: FontStyle.italic)),
-                      ]))),
-                )
-              ],
+                      Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: <Widget>[
+                              SizedBox(
+                                height: 20,
+                              ),
+                              _UsernameEntry(
+                                  usernameController: usernameController),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              _PasswordEntry(passController: passController),
+                              SizedBox(
+                                height: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      _isloading
+                          ? Center(child: CircularProgressIndicator())
+                          : GestureDetector(
+                              onTap: () async {
+                                await logintoServer(usernameController.text,
+                                    passController.text);
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(8),
+                                alignment: Alignment.center,
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  color: Color.fromRGBO(41, 128, 185, 1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text('Login', style: simpletextStyle()),
+                              ),
+                            ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RegisterScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          alignment: Alignment.center,
+                          width: 250,
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(41, 128, 185, 1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child:
+                              Text('Register Screen', style: simpletextStyle()),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PasswordEntry extends StatelessWidget {
+  const _PasswordEntry({
+    Key key,
+    @required this.passController,
+  }) : super(key: key);
+
+  final TextEditingController passController;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      obscureText: true,
+      validator: (value) {
+        return value.length > 6
+            ? null
+            : "Please Provide passowrd greater than 6 character";
+      },
+      controller: passController,
+      decoration: simpleInputDecoration("Enter password"),
+    );
+  }
+}
+
+class _UsernameEntry extends StatelessWidget {
+  const _UsernameEntry({
+    Key key,
+    @required this.usernameController,
+  }) : super(key: key);
+
+  final TextEditingController usernameController;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: usernameController,
+      style: TextStyle(
+        fontSize: 20,
+      ),
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.all(8),
+        hintText: "Enter username",
+        hintStyle: TextStyle(fontSize: 20),
+        focusedBorder: getBorder(),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(20),
           ),
         ),
       ),

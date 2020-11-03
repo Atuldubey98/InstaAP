@@ -1,15 +1,14 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:instaAP/chatprovider/createchat.dart';
 
 import 'package:instaAP/dataprovider/authenticateME.dart';
+import 'package:instaAP/dataprovider/userlistprovider.dart';
 import 'package:instaAP/models/userData.dart';
 
 import 'package:instaAP/screens/friendsItem.dart';
 import 'package:instaAP/screens/loginscreen.dart';
 import 'package:instaAP/utility/utils.dart';
+import 'package:instaAP/widgets/simplewidgets.dart';
 
 class ChatRooms extends StatefulWidget {
   final Function addtoList;
@@ -21,111 +20,203 @@ class ChatRooms extends StatefulWidget {
 class _ChatRoomsState extends State<ChatRooms> {
   AuthenticateME _authenticateME = new AuthenticateME();
   CreateChat _createChat = new CreateChat();
-  List<String> _list = [];
+  int count = 0;
+  UserListProvider _userListProvider = new UserListProvider();
+  @override
+  void initState() {
+    _userListProvider.stream = _userListProvider.streamController.stream;
+    getChatList();
+    socketListStatus();
 
-  Future getChat() async {
-    final response = await http.get(Utils.url + Utils.clients);
-    final jsondata = json.decode(response.body);
-
-    jsondata['data'].forEach((element) {
-      if (element['chatid'].contains(Useritemdata.username + "_")) {
-        final item =
-            element['chatid'].replaceAll(Useritemdata.username + "_", "");
-        _list.add(item);
-      } else if (element['chatid'].contains("_" + Useritemdata.username)) {
-        final item =
-            element['chatid'].replaceAll("_" + Useritemdata.username, "");
-        _list.add(item);
-      }
-    });
-    return _list;
+    super.initState();
   }
 
-  Stream<List<String>> get getChatlist async* {
-    yield await getChat();
+  socketListStatus() {
+    utils.getSocketIO((data) {
+      print(data);
+    });
+    if (utils.socketIO != null) {
+      utils.socketIO.subscribe(Useritemdata.username, (data) {
+        getChatList();
+      });
+    }
+  }
+
+  getChatList() async {
+    await _userListProvider.getChat().then((value) {
+      _createChat.list = value;
+      print(_createChat.list);
+      _userListProvider.streamController.add(value);
+    });
+
+    _userListProvider.list = [];
+  }
+
+  @override
+  void dispose() {
+    _userListProvider.streamController.close();
+    utils.socketIO.unSubscribe(Useritemdata.username);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
         elevation: 0,
         centerTitle: true,
         backgroundColor: Color.fromRGBO(41, 128, 185, 1),
         title: Text(
           'Your Friends',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.white,
+          ),
         ),
         actions: <Widget>[
           IconButton(
-              tooltip: "Log Out",
               icon: Icon(
-                Icons.all_out,
+                Icons.search,
                 color: Colors.white,
               ),
               onPressed: () {
-                _authenticateME.logout().then((_) {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AuthenticateScreen(),
-                      ),
-                      (route) => false);
-                });
-              })
+                showSearch(
+                  context: context,
+                  delegate: FriendSearch(_createChat.list),
+                );
+              }),
+          _LogoutButton(authenticateME: _authenticateME),
         ],
       ),
       body: Container(
-        child: StreamBuilder<List<String>>(
-            stream: getChatlist,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemBuilder: (context, index) {
-                    return Card(
-                      child: ListTile(
-                        onTap: () {
-                          _createChat.createItem(snapshot.data[index], context);
-                        },
-                        leading: CircleAvatar(
-                          backgroundImage:
-                              ExactAssetImage("assets/images/images.png"),
+        child: RefreshIndicator(
+          color: Color.fromRGBO(41, 128, 185, 1),
+          onRefresh: () async {
+            await getChatList();
+          },
+          child: StreamBuilder(
+              stream: _userListProvider.stream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  count = snapshot.data.length;
+                  return ListView.builder(
+                    itemBuilder: (context, index) {
+                      return Card(
+                        child: ListTile(
+                          onTap: () {
+                            _createChat.createItem(
+                                snapshot.data[index], context);
+                          },
+                          trailing: Text(
+                            snapshot.data[index][0],
+                            style: notSosimpletextStyle(),
+                          ),
+                          leading: CircleAvatar(
+                            backgroundImage:
+                                ExactAssetImage("assets/images/images.png"),
+                          ),
+                          title: Text(
+                            snapshot.data[index],
+                            style: TextStyle(fontSize: 20),
+                          ),
                         ),
-                        title: Text(
-                          snapshot.data[index],
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ),
-                    );
-                  },
-                  itemCount: snapshot.data.length,
-                );
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: Text(
-                    "Loading....",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                );
-              }
-              return Center(
-                child: Text("No Chat"),
-              );
-            }),
+                      );
+                    },
+                    itemCount: snapshot.data.length,
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return LoadingScreen();
+                }
+                return _NoChat();
+              }),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromRGBO(41, 128, 185, 1),
+      floatingActionButton: _FloatingActionsWidgets(),
+    );
+  }
+}
+
+class _LogoutButton extends StatelessWidget {
+  const _LogoutButton({
+    Key key,
+    @required AuthenticateME authenticateME,
+  })  : _authenticateME = authenticateME,
+        super(key: key);
+
+  final AuthenticateME _authenticateME;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        tooltip: "Log Out",
+        icon: Icon(
+          Icons.exit_to_app,
+          color: Colors.white,
+        ),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatFriendsList(),
-            ),
-          );
-        },
-        child: Icon(Icons.message),
-      ),
+          _authenticateME.logout().then((_) {
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AuthenticateScreen(),
+                ),
+                (route) => false);
+          });
+        });
+  }
+}
+
+class _NoChat extends StatelessWidget {
+  const _NoChat({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text("No Chat"),
+    );
+  }
+}
+
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: LinearProgressIndicator(
+      backgroundColor: Color.fromRGBO(41, 128, 185, 1),
+    ));
+  }
+}
+
+class _FloatingActionsWidgets extends StatelessWidget {
+  const _FloatingActionsWidgets({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: Color.fromRGBO(41, 128, 185, 1),
+      onPressed: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatFriendsList(),
+          ),
+        );
+      },
+      child: Icon(Icons.message),
     );
   }
 }

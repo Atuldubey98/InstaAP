@@ -24,16 +24,44 @@ class _ChatFriendsListState extends State<ChatFriendsList> {
   @override
   void initState() {
     stream = streamController.stream;
-    _userListProvider
-        .getListItem()
-        .then((value) => streamController.add(value));
+    _userListProvider.getListItem().then((value) {
+      streamController.add(value);
+      _createChat.list = value;
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar("Friend List"),
+      appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Users",
+          style: simpletextStyle(),
+        ),
+        backgroundColor: Color.fromRGBO(41, 128, 185, 1),
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(
+                Icons.search,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: FriendSearch(_createChat.list),
+                );
+              }),
+        ],
+      ),
       body: StreamBuilder(
         stream: stream,
         builder: (context, snapshot) {
@@ -44,10 +72,20 @@ class _ChatFriendsListState extends State<ChatFriendsList> {
             return ListView.builder(
               itemBuilder: (context, index) {
                 return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage:
+                        ExactAssetImage("assets/images/images.png"),
+                  ),
+                  contentPadding: EdgeInsets.all(3),
                   onTap: () {
                     _createChat.createItem(snapshot.data[index], context);
                   },
-                  title: Text(snapshot.data[index]),
+                  title: Text(
+                    snapshot.data[index],
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
                 );
               },
               itemCount: snapshot.data.length,

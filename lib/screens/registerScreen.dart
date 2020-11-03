@@ -49,8 +49,16 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   @override
+  void dispose() {
+    usernameController.dispose();
+    passController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
+    final double height = MediaQuery.of(context).size.height;
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) => Scaffold(
@@ -60,30 +68,49 @@ class _RegisterScreenState extends State<RegisterScreen>
               Matrix4.translationValues(animation.value * width, 0.0, 0.0),
           child: SingleChildScrollView(
             child: Container(
+              color: Color.fromRGBO(41, 128, 185, 0.2),
+              height: height,
               padding: EdgeInsets.all(20),
               child: Form(
                 key: formkey,
                 child: Column(
                   children: <Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset("assets/images/images.png"),
-                    ),
-                    TextFormField(
-                      decoration: simpleInputDecoration(),
-                      controller: usernameController,
+                    Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(60)),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(60),
+                        child: Image.asset("assets/images/images.png"),
+                      ),
                     ),
                     SizedBox(
                       height: 10,
                     ),
-                    TextFormField(
-                      decoration: simpleInputDecoration(),
-                      validator: (value) {
-                        return value.length > 6
-                            ? null
-                            : "Please Provide passowrd greater than 6 character";
-                      },
-                      controller: passController,
+                    Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          children: <Widget>[
+                            TextFormField(
+                              decoration: simpleInputDecoration("Username"),
+                              controller: usernameController,
+                              validator: (value) {
+                                return RegExp(
+                                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                        .hasMatch(value)
+                                    ? null
+                                    : "Please Enter Correct Email";
+                              },
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            _PasswordWidget(passController: passController),
+                          ],
+                        ),
+                      ),
                     ),
                     SizedBox(
                       height: 20,
@@ -97,44 +124,16 @@ class _RegisterScreenState extends State<RegisterScreen>
                         alignment: Alignment.center,
                         width: 100,
                         decoration: BoxDecoration(
-                          color: Colors.blue,
+                          color: Color.fromRGBO(41, 128, 185, 1),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          'Register',
-                          style: TextStyle(fontSize: 25, color: Colors.black),
-                        ),
+                        child: Text('Register', style: simpletextStyle()),
                       ),
                     ),
                     SizedBox(
                       height: 10,
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AuthenticateScreen(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        child: Container(
-                          width: 180,
-                          padding: EdgeInsets.all(8),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Login Screen',
-                            style: TextStyle(fontSize: 25, color: Colors.black),
-                          ),
-                        ),
-                      ),
-                    )
+                    _LoginScreenButton()
                   ],
                 ),
               ),
@@ -142,6 +141,61 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+class _LoginScreenButton extends StatelessWidget {
+  const _LoginScreenButton({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AuthenticateScreen(),
+          ),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(8),
+        child: Container(
+          width: 180,
+          padding: EdgeInsets.all(8),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Color.fromRGBO(41, 128, 185, 1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text('Login Screen', style: simpletextStyle()),
+        ),
+      ),
+    );
+  }
+}
+
+class _PasswordWidget extends StatelessWidget {
+  const _PasswordWidget({
+    Key key,
+    @required this.passController,
+  }) : super(key: key);
+
+  final TextEditingController passController;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      decoration: simpleInputDecoration("Password"),
+      validator: (value) {
+        return value.length > 6
+            ? null
+            : "Please Provide passowrd greater than 6 character";
+      },
+      controller: passController,
     );
   }
 }

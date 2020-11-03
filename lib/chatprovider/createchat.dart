@@ -3,12 +3,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:instaAP/models/userData.dart';
 import 'package:instaAP/screens/chatScreen.dart';
 import 'package:instaAP/utility/utils.dart';
 
 class CreateChat {
   String chatid;
+  List<String> list = List<String>();
   Future createChatID(String chatid) async {
     final response = await http.post(
       Utils.url + Utils.chatiditem,
@@ -18,14 +20,19 @@ class CreateChat {
       ),
     );
     final jsondata = json.decode(response.body);
-    print(jsondata);
+
+    return jsondata['mess'];
   }
 
   Future createItem(String friend, BuildContext context) async {
     chatid = getChatRooms(Useritemdata.username, friend);
-    print(chatid);
-    createChatID(chatid).then((_) {
-      Navigator.push(
+
+    createChatID(chatid).then((value) async {
+      print(value);
+      if (value != "old") {
+        utils.sendSocketMessageforlist();
+      }
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (conetext) => ChatScreen(friend, chatid),
